@@ -62,7 +62,6 @@
   <ItemGroup>
     <Compile Include="GameData\FgdProvider.cs" />
     <Compile Include="GameData\GameDataProvider.cs" />
-    <Compile Include="GenericStructure.cs" />
     <Compile Include="BinaryExtensions.cs" />
     <Compile Include="Map\L3DWProvider.cs" />
     <Compile Include="Map\MapProvider.cs" />
@@ -111,6 +110,10 @@
     <ProjectReference Include="..\CBRE.Packages\CBRE.Packages.csproj">
       <Project>{BB1AF818-8CCA-4BC8-A4A8-B7A0627B68DD}</Project>
       <Name>CBRE.Packages</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CBRE.Settings\CBRE.Settings.csproj">
+      <Project>{a79ff02f-3eaa-4ff1-a060-2e2ffe983ef3}</Project>
+      <Name>CBRE.Settings</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

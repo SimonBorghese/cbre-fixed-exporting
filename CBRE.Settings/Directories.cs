@@ -29,6 +29,34 @@ namespace CBRE.Settings {
             return filename;
         }
 
+        public static string GetRealTextureExtension(string filename) {
+            foreach (string dir in TextureDirs) {
+                string dirSlash = dir;
+                if (dir.Last() != '/' && dir.Last() != '\\') {
+                    dirSlash += "/";
+                }
+                foreach (string ext in TextureExtensions) {
+                    string fileWithExt = filename + "." + ext;
+                    if (File.Exists(dirSlash + fileWithExt)) { return ext; }
+                }
+            }
+            return filename;
+        }
+
+        public static string GetRealFileLocation(string filename) {
+            foreach (string dir in TextureDirs) {
+                string dirSlash = dir;
+                if (dir.Last() != '/' && dir.Last() != '\\') {
+                    dirSlash += "/";
+                }
+                foreach (string ext in TextureExtensions) {
+                    string fileWithExt = filename + "." + ext;
+                    if (File.Exists(dirSlash + fileWithExt)) { return  dirSlash + fileWithExt; }
+                }
+            }
+            return filename;
+        }
+
         public static string GetModelPath(string filename) {
             foreach (string dir in ModelDirs) {
                 string dirSlash = dir;

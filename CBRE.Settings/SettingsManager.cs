@@ -1,4 +1,4 @@
-﻿using CBRE.Providers;
+﻿using CBRE.Settings;
 using CBRE.Settings.Models;
 using System;
 using System.Collections.Generic;

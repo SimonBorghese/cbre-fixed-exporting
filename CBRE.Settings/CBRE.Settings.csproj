@@ -58,6 +58,7 @@
     <Compile Include="Directories.cs" />
     <Compile Include="DoubleClick3DAction.cs" />
     <Compile Include="FavouriteTextureFolder.cs" />
+    <Compile Include="GenericStructure.cs" />
     <Compile Include="HotkeyDefinition.cs" />
     <Compile Include="HotkeyImplementation.cs" />
     <Compile Include="Hotkeys.cs" />
@@ -87,9 +88,13 @@
     <Compile Include="View.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CBRE.Providers\CBRE.Providers.csproj">
-      <Project>{C7BD4AC8-1F8D-4520-AF2D-D279C0601AB4}</Project>
-      <Name>CBRE.Providers</Name>
+    <ProjectReference Include="..\CBRE.Common\CBRE.Common.csproj">
+      <Project>{5d414ac8-8b93-489f-9960-877923400fed}</Project>
+      <Name>CBRE.Common</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\CBRE.DataStructures\CBRE.DataStructures.csproj">
+      <Project>{26a974c9-e495-4fa3-8e87-1e00019d04f5}</Project>
+      <Name>CBRE.DataStructures</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

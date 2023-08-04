@@ -1,7 +1,7 @@
 ﻿using CBRE.Common.Mediator;
 using CBRE.DataStructures.MapObjects;
 using CBRE.Editor.Documents;
-using CBRE.Providers;
+using CBRE.Settings;
 using CBRE.Providers.Map;
 using System.Collections.Generic;
 using System.IO;

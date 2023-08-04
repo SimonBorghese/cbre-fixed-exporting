@@ -9,6 +9,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using CBRE.Settings;
 
 namespace CBRE.Providers.Map {
     public class VmfProvider : MapProvider {
