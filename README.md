@@ -17,7 +17,7 @@ Todo list:
 - [x] Fix exporting of other formats (OBJ, FBX) so that solids are exported as seperate meshes. (Previously, Unity would import these files as one giant mesh)
 - [ ] Allow for the embedding of textures loaded by the map
 - [ ] Allow for the exporting of more formats
-- [ ] Embed and/or export data related to entities either within the 3d models or seperately.
+- [x] Embed and/or export data related to entities either within the 3d models or seperately. (Partial, export entity data to .json)
 
 
 Not planned but may be done within the future:

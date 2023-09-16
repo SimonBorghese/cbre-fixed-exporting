@@ -3,6 +3,8 @@ using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using Assimp;
 using CBRE.DataStructures.Geometric;
 using CBRE.DataStructures.MapObjects;
@@ -13,6 +15,7 @@ using Face = CBRE.DataStructures.MapObjects.Face;
 using Mesh = Assimp.Mesh;
 using Path = System.IO.Path;
 using Directories = CBRE.Settings.Directories;
+using System.Xml.Linq;
 
 namespace CBRE.Providers.Model {
     public class AssimpProvider : ModelProvider {
@@ -160,109 +163,130 @@ namespace CBRE.Providers.Model {
             scene.RootNode = rootNode;
 
             Node newNode = new Node();
+            newNode.Name = "Meshes";
 
             Mesh mesh;
             int vertOffset;
             string[] textures = map.GetAllTextures().ToArray();
-            
 
             var Solids = map.WorldSpawn.Find(x => x is Solid).OfType<Solid>();
-            int ExportMeshIndex = 0;
-            foreach (Solid solid in Solids) {
-                var solids_face = solid.Faces;
+            var Entities = map.WorldSpawn.Find(x => x is Entity).OfType<Entity>();
 
-                // Refers to texture - face
-                Dictionary<string, List<Face>> AssociatedFaces = new Dictionary<string, List<Face>>();
-
-                foreach (Face face in solids_face) {
-                    if (!AssociatedFaces.ContainsKey(face.Texture.Name)) {
-                        List<Face> newFaceList = new List<Face>();
-                        AssociatedFaces.Add(face.Texture.Name, newFaceList);
-                        newFaceList.Add(face);
-                    } else {
-                        List<Face> faceList;
-                        if (AssociatedFaces.TryGetValue(face.Texture.Name, out faceList)) {
-                            faceList.Add(face);
-                        } else {
-                            Debug.Assert(false);
-                        }
-                    }
-                }
-
-                foreach (var FaceGroup in AssociatedFaces) {
-                    string texture = FaceGroup.Key;
-                   
-                    if (texture == "tooltextures/remove_face") { continue; }
-
-                    string RealTexture = Directories.GetRealFileLocation(texture);
-                    string TextureExt = Directories.GetRealTextureExtension(texture);
-
-                    //FileStream TextureFile = File.OpenRead(RealTexture);
-                    //int TextureIndex = scene.Textures.Count;
-                    //byte[] TextureData = new byte[TextureFile.Length];
-                    //TextureFile.Read(TextureData, 0, (int)TextureFile.Length);
-
-                    //EmbeddedTexture embeddedTexture = new EmbeddedTexture(TextureExt, TextureData);
-                    //scene.Textures.Add(embeddedTexture);
-
-                    Material material = new Material();
-                    material.Name = texture;
-                    TextureSlot textureSlot = new TextureSlot(RealTexture,
-                        TextureType.Diffuse,
-                        0,
-                        TextureMapping.Plane,
-                        0,
-                        1.0f,
-                        TextureOperation.Multiply,
-                        Assimp.TextureWrapMode.Wrap,
-                        Assimp.TextureWrapMode.Wrap,
-                        0);
-                    material.AddMaterialTexture(ref textureSlot);
-
-                   
-
-                    scene.Materials.Add(material);
-
-                    mesh = new Mesh();
-                   
-                    //if (format != "obj") // .obj files should have no mesh names so they are one proper mesh
-                    //{
-                    mesh.Name = ExportMeshIndex.ToString() + texture + "_mesh";
-                    ExportMeshIndex++;
-                    //}
-                    mesh.MaterialIndex = scene.MaterialCount - 1;
-                    
-                    vertOffset = 0;
-
-                    List<int> indices = new List<int>();
-
-                    IEnumerable<Face> faces = FaceGroup.Value;
-
-                    foreach (Face face in faces) {
-                        foreach (Vertex v in face.Vertices) {
-                            mesh.Vertices.Add(new Vector3D((float)v.Location.X, (float)v.Location.Z, (float)v.Location.Y));
-                            mesh.Normals.Add(new Vector3D((float)face.Plane.Normal.X, (float)face.Plane.Normal.Z, (float)face.Plane.Normal.Y));
-                            mesh.TextureCoordinateChannels[0].Add(new Vector3D((float)v.TextureU, (float)v.TextureV, 0));
-                        }
-                        mesh.UVComponentCount[0] = 2;
-                        foreach (uint ind in face.GetTriangleIndices()) {
-                            indices.Add((int)ind + vertOffset);
-                        }
-
-                        vertOffset += face.Vertices.Count;
-                    }
-
-                    mesh.SetIndices(indices.ToArray(), 3);
-                    scene.Meshes.Add(mesh);
-
-                    newNode.MeshIndices.Add(scene.MeshCount - 1);
-                }
-            }
             
 
-            rootNode.Children.Add(newNode);
+            if (format != "json") {
 
-            new AssimpContext().ExportFile(scene, filename, format);
+                int ExportMeshIndex = 0;
+                foreach (Solid solid in Solids) {
+                    var solids_face = solid.Faces;
+
+                    // Refers to texture - face
+                    Dictionary<string, List<Face>> AssociatedFaces = new Dictionary<string, List<Face>>();
+
+                    foreach (Face face in solids_face) {
+                        if (!AssociatedFaces.ContainsKey(face.Texture.Name)) {
+                            List<Face> newFaceList = new List<Face>();
+                            AssociatedFaces.Add(face.Texture.Name, newFaceList);
+                            newFaceList.Add(face);
+                        } else {
+                            List<Face> faceList;
+                            if (AssociatedFaces.TryGetValue(face.Texture.Name, out faceList)) {
+                                faceList.Add(face);
+                            } else {
+                                Debug.Assert(false);
+                            }
+                        }
+                    }
+
+                    foreach (var FaceGroup in AssociatedFaces) {
+                        string texture = FaceGroup.Key;
+
+                        if (texture == "tooltextures/remove_face") { continue; }
+
+                        string RealTexture = Directories.GetRealFileLocation(texture);
+                        string TextureExt = Directories.GetRealTextureExtension(texture);
+
+                        Material material = new Material();
+                        material.Name = texture;
+                        TextureSlot textureSlot = new TextureSlot(RealTexture,
+                            TextureType.Diffuse,
+                            0,
+                            TextureMapping.Plane,
+                            0,
+                            1.0f,
+                            TextureOperation.Multiply,
+                            Assimp.TextureWrapMode.Wrap,
+                            Assimp.TextureWrapMode.Wrap,
+                            0);
+                        material.AddMaterialTexture(ref textureSlot);
+
+
+
+                        scene.Materials.Add(material);
+
+                        mesh = new Mesh();
+
+                        //if (format != "obj") // .obj files should have no mesh names so they are one proper mesh
+                        //{
+                        mesh.Name = ExportMeshIndex.ToString() + texture + "_mesh";
+                        ExportMeshIndex++;
+                        //}
+                        mesh.MaterialIndex = scene.MaterialCount - 1;
+
+                        vertOffset = 0;
+
+                        List<int> indices = new List<int>();
+
+                        IEnumerable<Face> faces = FaceGroup.Value;
+
+                        foreach (Face face in faces) {
+                            foreach (Vertex v in face.Vertices) {
+                                mesh.Vertices.Add(new Vector3D((float)v.Location.X, (float)v.Location.Z, (float)v.Location.Y));
+                                mesh.Normals.Add(new Vector3D((float)face.Plane.Normal.X, (float)face.Plane.Normal.Z, (float)face.Plane.Normal.Y));
+                                mesh.TextureCoordinateChannels[0].Add(new Vector3D((float)v.TextureU, (float)v.TextureV, 0));
+                            }
+                            mesh.UVComponentCount[0] = 2;
+                            foreach (uint ind in face.GetTriangleIndices()) {
+                                indices.Add((int)ind + vertOffset);
+                            }
+
+                            vertOffset += face.Vertices.Count;
+                        }
+
+                        mesh.SetIndices(indices.ToArray(), 3);
+
+                        scene.Meshes.Add(mesh);
+
+                        newNode.MeshIndices.Add(scene.MeshCount - 1);
+
+                    }
+                }
+
+
+                rootNode.Children.Add(newNode);
+
+                new AssimpContext().ExportFile(scene, filename, format);
+            } else {
+                List<EntityExport> _entities = new List<EntityExport>();
+
+                foreach (Entity ent in Entities) {
+                    Dictionary<string, string> flags = new Dictionary<string, string>();
+                    foreach (var element in ent.EntityData.Properties) {
+                        flags.Add(element.Key, element.Value);
+                    }
+                    _entities.Add(new EntityExport() {
+                        ClassName = ent.ClassName,
+                        Origin = string.Format("{0:0.00} {1:0.00} {2:0.00}", ent.Origin.DX, ent.Origin.DY, ent.Origin.DZ),
+                        Flags = flags
+                    });
+                }
+
+
+                string json = JsonSerializer.Serialize(_entities);
+                File.WriteAllText(filename, json);
+            }
+
         }
+
     }
 }

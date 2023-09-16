@@ -66,6 +66,7 @@ namespace CBRE.Editor.Compiling {
 #endif
                 filter += "SCP-CB v1.3.11 RMesh (*.rmesh)|*.rmesh";
                 filter += "|Autodesk Filmbox (*.fbx)|*.fbx";
+                filter += "|Entity Data (*.json)|*.json";
                 filter += "|Wavefront Object (*.obj)|*.obj";
                 filter += "|Stereolithography (*.stl)|*.stl";
                 filter += "|Stanford Polygon Library (*.ply)|*.ply";
@@ -184,7 +185,8 @@ namespace CBRE.Editor.Compiling {
                           extension.Equals(".obj", StringComparison.OrdinalIgnoreCase) ||
                           extension.Equals(".dae", StringComparison.OrdinalIgnoreCase) ||
                           extension.Equals(".stl", StringComparison.OrdinalIgnoreCase) ||
-                          extension.Equals(".ply", StringComparison.OrdinalIgnoreCase)) {
+                          extension.Equals(".ply", StringComparison.OrdinalIgnoreCase) ||
+                          extension.Equals(".json", StringComparison.OrdinalIgnoreCase)) {
                         GenericExport.SaveToFile(SaveFileName, Document, this, extension.Substring(1));
                     } else {
                         throw new Exception($"Unknown file extension ({extension})");
